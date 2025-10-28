@@ -1,13 +1,12 @@
-name: Docker Fullstack
+name: Build and Push Docker Images
 
 on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,20 +22,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 🧩 Backend (customer backend path)
-      - name: Build and push backend image
+      - name: Build and push merged portal frontend
         uses: docker/build-push-action@v5
         with:
-          context: ./backend/customer-backend/TravelBookingBackend
-          file: ./backend/backend.Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/travel-backend:latest
-
-      # 🧩 Frontend (portal path)
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend/portal
+          context: .
           file: ./frontend/frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/travel-frontend:latest
