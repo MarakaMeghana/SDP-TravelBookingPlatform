@@ -1,22 +1,27 @@
-# Stage 1: Build
-FROM node:20 AS build
+# Stage 1: Build stage
+FROM node:20-alpine AS build
 WORKDIR /app
 
+# Copy package files first (for caching dependencies)
 COPY package*.json ./
 
-# Add verbose logging for debugging
-RUN npm config set loglevel verbose
+# Install dependencies
+RUN npm install
 
-# Try installation, but print logs if it fails
-RUN npm install --legacy-peer-deps || cat /root/.npm/_logs/*
-
+# Copy the rest of your project files
 COPY . .
 
-# Try building, but print logs if it fails
-RUN npm run build || cat /root/.npm/_logs/*
+# Build the Vite project
+RUN npm run build
 
-# Stage 2: Serve production
+# Stage 2: Nginx for serving production build
 FROM nginx:alpine
+
+# Copy built files from /app/dist to nginx html directory
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose port 80 for HTTP
 EXPOSE 80
+
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
