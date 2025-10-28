@@ -15,24 +15,29 @@ services:
       - springboot-mysql-net
 
   backend:
-    image: marakameghana/travel-backend:latest
-    container_name: springboot
-    ports:
-      - "2025:2000"
+    build:
+      context: ./backend
+      dockerfile: backend.Dockerfile
+    container_name: backend-service
     depends_on:
       - mysqldb
-    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/traveldb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Megha@22
+    ports:
+      - "8081:8081"
+      - "8082:8082"
     networks:
       - springboot-mysql-net
 
   frontend:
-    image: marakameghana/travel-frontend:latest
-    container_name: react
+    build:
+      context: ./frontend
+      dockerfile: frontend.Dockerfile
+    container_name: frontend-service
     ports:
       - "3000:80"
-    depends_on:
-      - backend
-    restart: on-failure
     networks:
       - springboot-mysql-net
 
@@ -41,4 +46,3 @@ volumes:
 
 networks:
   springboot-mysql-net:
-    driver: bridge
