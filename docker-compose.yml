@@ -4,7 +4,7 @@ services:
     container_name: mysql-db
     environment:
       MYSQL_ROOT_PASSWORD: Megha@22
-      MYSQL_DATABASE: klustudentdb
+      MYSQL_DATABASE: travel
     ports:
       - "3307:3306"
     volumes:
