@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # 🧠 Customer Backend (Spring Boot)
+  customer-backend:
+    build:
+      context: ./backend/customer-backend/TravelBookingBackend
+      dockerfile: Dockerfile
+    container_name: customer-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - ./backend/customer-backend/TravelBookingBackend:/app
+    networks:
+      - travelnet
+
+  # 🧠 Admin Backend (Spring Boot)
+  admin-backend:
+    build:
+      context: ./backend/admin-backend/backend-admin/traveladmin
+      dockerfile: Dockerfile
+    container_name: admin-backend
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - ./backend/admin-backend/backend-admin/traveladmin:/app
+    networks:
+      - travelnet
+
+  # 💻 Portal Frontend (React)
+  portal-frontend:
+    build:
+      context: ./frontend/portal
+      dockerfile: Dockerfile
+    container_name: portal-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - customer-backend
+      - admin-backend
+    networks:
+      - travelnet
+
+  # 💻 Customer Frontend (React)
+  customer-frontend:
+    build:
+      context: ./frontend/customer/Frontend
+      dockerfile: Dockerfile
+    container_name: customer-frontend
+    ports:
+      - "3001:3000"
+    depends_on:
+      - customer-backend
+    networks:
+      - travelnet
+
+  # 💻 Admin Frontend (React)
+  admin-frontend:
+    build:
+      context: ./frontend/admin/frontend-admin/travel-admin-frontend
+      dockerfile: Dockerfile
+    container_name: admin-frontend
+    ports:
+      - "3002:3000"
+    depends_on:
+      - admin-backend
+    networks:
+      - travelnet
+
+networks:
+  travelnet:
+    driver: bridge
