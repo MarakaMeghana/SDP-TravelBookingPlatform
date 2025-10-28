@@ -1,34 +1,22 @@
-# ========================
-# Stage 1: Build the React app
-# ========================
-FROM node:20-alpine AS build
-
-# Add build dependencies (important for alpine)
-RUN apk add --no-cache python3 make g++ bash
-
-# Set working directory
+# Stage 1: Build
+FROM node:20 AS build
 WORKDIR /app
 
-# Copy package.json and install dependencies
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
 
-# Copy rest of the frontend source
+# Add verbose logging for debugging
+RUN npm config set loglevel verbose
+
+# Try installation, but print logs if it fails
+RUN npm install --legacy-peer-deps || cat /root/.npm/_logs/*
+
 COPY . .
 
-# Build production files
-RUN npm run build
+# Try building, but print logs if it fails
+RUN npm run build || cat /root/.npm/_logs/*
 
-# ========================
-# Stage 2: Serve with Nginx
-# ========================
+# Stage 2: Serve production
 FROM nginx:alpine
-
-# Copy built files from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 80
 EXPOSE 80
-
-# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]
