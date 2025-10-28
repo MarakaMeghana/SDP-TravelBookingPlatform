@@ -4,67 +4,68 @@ on:
   push:
     branches:
       - main
-      - master
-  workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Step 3: Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # ---------------- Portal Frontend ----------------
+      # Step 4: Build and push Portal Frontend
       - name: Build and push Portal Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/portal
-          file: ./frontend/portal/frontend.Dockerfile
+          file: ./frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/portal-frontend:latest
 
-      # ---------------- Customer Frontend ----------------
+      # Step 5: Build and push Customer Frontend
       - name: Build and push Customer Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/customer/Frontend
-          file: ./frontend/customer/Frontend/frontend.Dockerfile
+          file: ./frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/customer-frontend:latest
 
-      # ---------------- Admin Frontend ----------------
+      # Step 6: Build and push Admin Frontend
       - name: Build and push Admin Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/admin/frontend-admin/travel-admin-frontend
-          file: ./frontend/admin/frontend-admin/travel-admin-frontend/frontend.Dockerfile
+          file: ./frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/admin-frontend:latest
 
-      # ---------------- Customer Backend ----------------
+      # Step 7: Build and push Customer Backend
       - name: Build and push Customer Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend/customer-backend/TravelBookingBackend
-          file: ./backend/customer-backend/TravelBookingBackend/backend.Dockerfile
+          file: ./backend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/customer-backend:latest
 
-      # ---------------- Admin Backend ----------------
+      # Step 8: Build and push Admin Backend
       - name: Build and push Admin Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend/admin-backend/backend-admin/traveladmin
-          file: ./backend/admin-backend/backend-admin/traveladmin/backend.Dockerfile
+          file: ./backend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/admin-backend:latest
