@@ -1,76 +1,96 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  # 🧠 Customer Backend (Spring Boot)
+  # 🟢 MySQL Database
+  mysqldb:
+    image: mysql:8
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: Megha@22
+      MYSQL_DATABASE: travelbookingdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - travelnet
+
+  # 🟡 Customer Backend
   customer-backend:
     build:
       context: ./backend/customer-backend/TravelBookingBackend
-      dockerfile: Dockerfile
+      dockerfile: ../../backend.Dockerfile
     container_name: customer-backend
-    ports:
-      - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    volumes:
-      - ./backend/customer-backend/TravelBookingBackend:/app
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/travelbookingdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Megha@22
+    ports:
+      - "2000:2000"
+    depends_on:
+      - mysqldb
     networks:
       - travelnet
 
-  # 🧠 Admin Backend (Spring Boot)
+  # 🔵 Admin Backend
   admin-backend:
     build:
       context: ./backend/admin-backend/backend-admin/traveladmin
-      dockerfile: Dockerfile
+      dockerfile: ../../backend.Dockerfile
     container_name: admin-backend
-    ports:
-      - "8081:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    volumes:
-      - ./backend/admin-backend/backend-admin/traveladmin:/app
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/travelbookingdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: docker
+    ports:
+      - "2001:2000"
+    depends_on:
+      - mysqldb
     networks:
       - travelnet
 
-  # 💻 Portal Frontend (React)
+  # 🟣 Portal Frontend
   portal-frontend:
     build:
       context: ./frontend/portal
-      dockerfile: Dockerfile
+      dockerfile: ../../frontend.Dockerfile
     container_name: portal-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - customer-backend
       - admin-backend
     networks:
       - travelnet
 
-  # 💻 Customer Frontend (React)
+  # 🟢 Customer Frontend
   customer-frontend:
     build:
       context: ./frontend/customer/Frontend
-      dockerfile: Dockerfile
+      dockerfile: ../../frontend.Dockerfile
     container_name: customer-frontend
     ports:
-      - "3001:3000"
+      - "3001:80"
     depends_on:
       - customer-backend
     networks:
       - travelnet
 
-  # 💻 Admin Frontend (React)
+  # 🟠 Admin Frontend
   admin-frontend:
     build:
       context: ./frontend/admin/frontend-admin/travel-admin-frontend
-      dockerfile: Dockerfile
+      dockerfile: ../../frontend.Dockerfile
     container_name: admin-frontend
     ports:
-      - "3002:3000"
+      - "3002:80"
     depends_on:
       - admin-backend
     networks:
       - travelnet
 
+volumes:
+  mysql_data:
+
 networks:
   travelnet:
-    driver: bridge
