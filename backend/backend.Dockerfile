@@ -1,30 +1,30 @@
-# ===== Stage 1: Build admin backend =====
-FROM maven:3.9.4-eclipse-temurin-17 AS admin-build
-WORKDIR /app/admin
-COPY admin-backend/backend-admin/traveladmin/pom.xml .
-RUN mvn dependency:go-offline -B
-COPY admin-backend/backend-admin/traveladmin .
-RUN mvn clean package -DskipTests
+# =========================
+# Stage 1: Build Backend JARs
+# =========================
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+WORKDIR /app
 
-# ===== Stage 2: Build customer backend =====
-FROM maven:3.9.4-eclipse-temurin-17 AS customer-build
-WORKDIR /app/customer
-COPY customer-backend/TravelBookingBackend/pom.xml .
-RUN mvn dependency:go-offline -B
-COPY customer-backend/TravelBookingBackend .
-RUN mvn clean package -DskipTests
+# Copy both backend modules into the container
+COPY admin-backend/backend-admin/traveladmin ./admin-backend/backend-admin/traveladmin
+COPY customer-backend/TravelBookingBackend ./customer-backend/TravelBookingBackend
 
-# ===== Stage 3: Create final combined image =====
+# Build both projects
+RUN mvn -f admin-backend/backend-admin/traveladmin/pom.xml clean package -DskipTests
+RUN mvn -f customer-backend/TravelBookingBackend/pom.xml clean package -DskipTests
+
+# =========================
+# Stage 2: Run the backend
+# =========================
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# Copy both JARs built from admin & customer
-COPY --from=admin-build /app/admin/target/*.jar admin-backend.jar
-COPY --from=customer-build /app/customer/target/*.jar customer-backend.jar
+# Copy both built JARs
+COPY --from=build /app/admin-backend/backend-admin/traveladmin/target/*.jar /app/admin-backend.jar
+COPY --from=build /app/customer-backend/TravelBookingBackend/target/*.jar /app/customer-backend.jar
 
-# Expose ports for both services (adjust if different)
+# Expose ports for both backend services
+EXPOSE 8080
 EXPOSE 8081
-EXPOSE 8082
 
-# Optional: You can choose which service to run by passing an argument
-CMD ["java", "-jar", "admin-backend.jar"]
+# Run both JARs (using background + foreground pattern)
+CMD java -jar /app/admin-backend.jar & java -jar /app/customer-backend.jar

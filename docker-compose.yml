@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  mysqldb:
+  mysql:
     image: mysql:8
     container_name: mysql-db
     environment:
@@ -18,16 +18,13 @@ services:
     build:
       context: ./backend
       dockerfile: backend.Dockerfile
-    container_name: backend-service
-    depends_on:
-      - mysqldb
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/traveldb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Megha@22
+    image: marakameghana/travel-backend:latest
+    container_name: travel-backend
     ports:
+      - "8080:8080"
       - "8081:8081"
-      - "8082:8082"
+    depends_on:
+      - mysql
     networks:
       - springboot-mysql-net
 
@@ -35,9 +32,12 @@ services:
     build:
       context: ./frontend
       dockerfile: frontend.Dockerfile
-    container_name: frontend-service
+    image: marakameghana/travel-frontend:latest
+    container_name: travel-frontend
     ports:
       - "3000:80"
+    depends_on:
+      - backend
     networks:
       - springboot-mysql-net
 
