@@ -12,62 +12,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3️⃣ Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4️⃣ Build and Push Portal Frontend
-      - name: Build and push Portal frontend image
+      # ---------------- Portal Frontend ----------------
+      - name: Build and push Portal Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/portal
-          file: ./frontend/portal/Dockerfile
+          file: ./frontend/portal/frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/portal-frontend:latest
 
-      # 5️⃣ Build and Push Customer Frontend
-      - name: Build and push Customer frontend image
+      # ---------------- Customer Frontend ----------------
+      - name: Build and push Customer Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/customer/Frontend
-          file: ./frontend/customer/Frontend/Dockerfile
+          file: ./frontend/customer/Frontend/frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/customer-frontend:latest
 
-      # 6️⃣ Build and Push Admin Frontend
-      - name: Build and push Admin frontend image
+      # ---------------- Admin Frontend ----------------
+      - name: Build and push Admin Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/admin/frontend-admin/travel-admin-frontend
-          file: ./frontend/admin/frontend-admin/travel-admin-frontend/Dockerfile
+          file: ./frontend/admin/frontend-admin/travel-admin-frontend/frontend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/admin-frontend:latest
 
-      # 7️⃣ Build and Push Customer Backend
-      - name: Build and push Customer backend image
+      # ---------------- Customer Backend ----------------
+      - name: Build and push Customer Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend/customer-backend/TravelBookingBackend
-          file: ./backend/customer-backend/TravelBookingBackend/Dockerfile
+          file: ./backend/customer-backend/TravelBookingBackend/backend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/customer-backend:latest
 
-      # 8️⃣ Build and Push Admin Backend
-      - name: Build and push Admin backend image
+      # ---------------- Admin Backend ----------------
+      - name: Build and push Admin Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend/admin-backend/backend-admin/traveladmin
-          file: ./backend/admin-backend/backend-admin/traveladmin/Dockerfile
+          file: ./backend/admin-backend/backend-admin/traveladmin/backend.Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/admin-backend:latest
